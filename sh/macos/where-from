@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+# Set the separator to \n, just in case it is a space. (My filenames can have spaces)
+OIFS="$IFS";
+IFS=$'\n';
+
+#  Var to hold a list of the files that have no kMDItemWhereFroms metadata key. Also counters.
+NOMETADATAFILES="Files with no from data:\n";
+FOUNDNOMDFILES=0;
+IGNOREDFILES=0;
+
+# Immediate feedback... 
+echo "Working on it...";
+
+# Go through the files to get where they're from.
+for f in `/bin/ls -1 -a ${*}`; do
+    # Get the apple metadata for where a file was downloaded from, with mdls formatting stripped out.
+    FROMWHERESTR=$(/usr/bin/mdls -name kMDItemWhereFroms ${f} | sed -E "s/kMDItemWhereFroms//g; s/\(//g; s/\)//g; s/\=//g; s/\n//g");
+
+    # Guard against subdirectory listings, non-useful files, and null values of kMDItemWhereFroms.
+    if [[ $f == "." ]] || [[ $f == ".." ]] || [[ $f =~ ":$" ]]  then
+        IGNOREDFILES=1;
+    elif [[ -z $FROMWHERESTR ]] || [[ "${FROMWHERESTR}" =~ "null" ]]; then
+        FOUNDNOMDFILES=1;
+        NOMETADATAFILES="${NOMETADATAFILES}    - ${f}\n";
+    else
+        # List sanitized location(s) the file is from.
+        echo "\n- ${f} is From: ${FROMWHERESTR}";
+    fi;
+done
+
+echo "";
+if [[ $FOUNDNOMDFILES != 0 ]]; then
+    echo "${NOMETADATAFILES}";
+fi;
+
+# Set the separator back.
+IFS=$OIFS;
