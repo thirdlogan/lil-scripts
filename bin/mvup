@@ -1,0 +1,11 @@
+#! /bin/zsh
+
+echo "Flattening directory contents.";
+echo "--";
+
+for FL in $@; do
+  echo "  = ${FL}";
+  mv ./$FL/*/*.* ./${FL}/;
+done;
+
+echo "--Done--";

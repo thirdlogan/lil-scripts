@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#for file in "${@}"; do
+
+find "${@}" | while read file; do
+    TMPDIR="${file//\.rar/}"
+    ZDIR="${TMPDIR//\//}"
+    echo "unrar-ing ${file} to ${ZDIR}"
+    unrar -or -x "${ZDIR}" "${file}"
+done

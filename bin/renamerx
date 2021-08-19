@@ -1,0 +1,79 @@
+#!/bin/zsh
+
+# Set globbing options.
+setopt globsubst
+setopt extendedglob
+
+# Usage function.
+function print_usage() {
+  echo "renamerx was called with incorrect syntax... Got '--regex-matcher=${@[1]}', '--replacement=${@[2]}',\nfiles: \[${@[3,-1]}\]\n";
+  echo "-+ Call like:\t${0} --regex-matcher='\\.avi' --replacement='.mp4' ./dir/*.avi +-";
+}
+
+if [[ -z $1 || -z $2 || -z $3 ]]; then
+  echo "call it like renamerx -=regex-matcher='.*' --replacement='dn' ./people/s*.txt";
+  return false;
+fi
+
+# constants-ish
+local FLTMPLST="${HOME}/tmp/renamerx-filelist.index"
+local FLOUTDIR="${HOME}/tmp/txts";
+local MKD_RES=`mkdir -p "${FLOUTDIR}"`
+echo "Made ouput dir: ${FLOUTDIR}.";
+
+# Our input vars.
+local RGX="${1/--regex-matcher=/}";
+local RPL="${2/--replacement=/}";
+local FILES="${@[3,-1]}";
+
+# Test our input vars, show usage if inputs are wrong.
+if [[ -z ${RGX} || -z ${RPL} || ${#FILES} -eq 0 ]]; then
+  echo "passed bad params. Got '--regex-matcher=${RGX}', '--replacement=${RPL}', files: ${FILES}\n";
+  echo "-+ Call like:\t${0} --regex-matcher='\\.avi' --replacement='.mp4' ./dir/*.avi +-";
+
+  # Failure response, false.
+  return false;
+else
+  ## Write the file list to disk temporarily.
+  local TL_RES=$(print ${(@)FILES} > "${FLTMPLST}");
+
+  # Write the status.
+  echo "Wrote ${#FILES} file entries to "${FLTMPLST}" for processing..."
+
+
+  # echo the regex and replacement
+  echo "got regex: '${RGX}' -and- replacement: '${RPL}'. Now Looping and renaming... ";
+
+  # Now loop through each f in $FILES, doing the regex replacement, and handling non-unique filename collisions.
+  for f in ${(fle)"$(<$FLTMPLST)"}; do
+    echo "\n--\nfile: '${f}'";
+
+    # Do the simple substitution for the new filename, NOT directory
+    local DNAME=`dirname "${f}"`
+    local fbasename=`basename "${f}"`;
+    local fprepped="${fbasename// /_}";
+    local NEW_FPATH="${dname}""/""${fprepped//${RGX}/${RPL}}";
+
+    # if there's already a file by that filename, prefix with the seconds since 1970.
+    if [[ "${f}" == "${new_fpath}" ]]; then
+      echo "Regex did not yield a new filename for ${f}... SKIPPING.";
+    elif [[ -a "${NEW_FPATH}" ]]; then
+      echo "Already a file '${NEW_FPATH}' exists... SKIPPING";
+    else
+      # Actually do the 'mv' command. echo the output result.
+      echo "Renaming ${f} to '${NEW_FPATH}'...";
+      local MV_RES={`mv "${f}" "${NEW_FPATH}"`};
+
+      if [[ -a "${NEW_FPATH}" ]]; then
+        echo "Success!";
+      else
+        echo "Failed to rename. result: '${MV_RES}'";
+      fi;
+    fi;
+  done;
+fi
+
+echo "Script is done!";
+
+# Success response, true.
+return true;

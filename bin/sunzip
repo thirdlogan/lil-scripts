@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#for file in "${@}"; do
+
+find "${@}" | while read file; do
+    TMPDIR="${file//\.zip/}"
+    ZDIR="${TMPDIR//\//}"
+    echo "unzipping ${file} to ${ZDIR}"
+    unzip -qd "${ZDIR}" "${file}"
+done

@@ -1,0 +1,59 @@
+#!/bin/zsh
+
+####
+# This script is for unipping multiple files at once from the cli,
+# and having them all extract to new individual subdirectories. We must be
+# passed one or more glob-match strings for the zips we are to open.
+# -sidspencer 05/23/2021
+ 
+#- Constants
+ROOTXDIR="extract"
+
+#- Change to sweeter glob behavior
+setopt localoptions nullglob
+setopt localoptions globassign
+
+#- Helper function
+joinArrElms () {
+  local IFS=`echo -en "${1}"`$' '
+  shift
+  echo "$*"
+}
+
+#- Check our glob-strings received, printing usage and exiting otherwise.
+ZFLS=( $@ )
+if [[ -z $1 ]] {
+    echo "Usage: unzipper [zipnameglob-1] [... [zipnameglob-N]]"
+    exit 1
+}
+
+#-- Setup Ends --#
+
+
+
+#- Go unzip the files. Give the user basic feedback.
+echo "unzipping glob-matched files:\n  "`joinArrElms $', ' "${ZFLS[@]}"`"...\n"
+
+#- The meat of this script is here. This for-loop builds a subdir for each zip file
+#- to be matched, unzip is then called, we print out minor telemetry, and it's done!
+CT=0
+for FL in `ls ${ZFLS[@]}`; do 
+    # Get our index in this process, use it to salt the ROOTXDIR string. Then unzip.
+    let "CT=${CT} + 1";
+    unzip -d "${ROOTXDIR}-${CT}" "${FL}"; 
+
+    # Give small telelmetry of how many files extraced to that subdir.
+    let "FCT=`ls -1 ${ROOTXDIR}-${CT} | wc -l`"
+    echo "${FCT} files extracted.\n"
+done; 
+
+
+
+#-- Teardown Begins --#
+
+#- Clean up by undoing our glob behavior change.
+unsetopt localoptions nullglob
+unsetopt localoptions globassign
+
+#- Fini
+echo "unzipper completed. See above for possible errors."
