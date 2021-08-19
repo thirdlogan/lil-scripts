@@ -1,0 +1,2 @@
+#! /bin/bash
+/usr/bin/xattr -w kMDItemFinderComment $1 $2

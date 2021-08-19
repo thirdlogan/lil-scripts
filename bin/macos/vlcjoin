@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/Applications/VLC.app/Contents/MacOS/VLC -vvv $@ --sout-keep --sout=#gather:transcode{vcodec=h264,vb=1024,scale=1,acodec=mp4a,ab=192,channels=6}:standard{access=file,mux=ts,dst=out.mpg} --sout-all
+
