@@ -7,6 +7,6 @@ DEST_DIR=$3
 if [[ -z $DEST_DIR ]]; then
     echo "Call like this: mvmult <search-dir> <file-matching-regex> <destination-dir>. (It's all case-sensitive)";
 else
-    find -E "${1}" -regex "${2}" -exec mv -v "{}" "${3}"  \;
+    find "${1}" -regex "${2}" -exec mv -v "{}" "${3}"  \;
 fi
 
