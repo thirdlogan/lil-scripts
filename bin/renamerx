@@ -11,7 +11,7 @@ function print_usage() {
 }
 
 if [[ -z $1 || -z $2 || -z $3 ]]; then
-  echo "call it like renamerx -=regex-matcher='.*' --replacement='dn' ./people/s*.txt";
+  echo "call it like renamerx --regex-matcher='.*' --replacement='dn' ./people/s*.txt";
   return false;
 fi
 
@@ -45,14 +45,14 @@ else
   echo "got regex: '${RGX}' -and- replacement: '${RPL}'. Now Looping and renaming... ";
 
   # Now loop through each f in $FILES, doing the regex replacement, and handling non-unique filename collisions.
-  for f in ${(fle)"$(<$FLTMPLST)"}; do
+  for f in ${$(<$FLTMPLST)}; do
     echo "\n--\nfile: '${f}'";
 
     # Do the simple substitution for the new filename, NOT directory
     local DNAME=`dirname "${f}"`
     local fbasename=`basename "${f}"`;
     local fprepped="${fbasename// /_}";
-    local NEW_FPATH="${dname}""/""${fprepped//${RGX}/${RPL}}";
+    local NEW_FPATH="${DNAME}""/""${fprepped//${RGX}/${RPL}}";
 
     # if there's already a file by that filename, prefix with the seconds since 1970.
     if [[ "${f}" == "${new_fpath}" ]]; then
